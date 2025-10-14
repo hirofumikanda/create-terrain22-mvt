@@ -2,3 +2,4 @@
 *.mbtiles
 *.pmtiles
 *.gpkg
+*journal
