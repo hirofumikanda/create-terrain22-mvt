@@ -69,28 +69,28 @@ wget unzip
 
 ```bash
 # 全地域を順次処理（統合なし）
-./run_batch.sh
+./run.sh
 
 # 全地域を処理して統合
-./run_batch.sh --merge
+./run.sh --merge
 
 # 特定地域のみ処理
-./run_batch.sh 41 42 43
+./run.sh 41 42 43
 
 # 特定地域を処理して統合
-./run_batch.sh --merge 41 42 43
+./run.sh --merge 41 42 43
 
 # 並列処理（4つのジョブで全地域を同時実行）
-./run_batch.sh --parallel 4
+./run.sh --parallel 4
 
 # 並列処理で全地域を処理して統合
-./run_batch.sh --parallel 4 --merge
+./run.sh --parallel 4 --merge
 
 # 並列処理で特定地域を処理
-./run_batch.sh --parallel 2 41 42 43
+./run.sh --parallel 2 41 42 43
 
 # ヘルプ表示
-./run_batch.sh --help
+./run.sh --help
 ```
 
 ### 4. PMTiles統合処理
@@ -146,10 +146,10 @@ wget unzip
 #### 段階的処理（推奨）
 ```bash
 # 1. テスト用に数地域を処理
-./run_batch.sh 41 42 43
+./run.sh 41 42 43
 
 # 2. 結果確認後、全地域を並列処理
-./run_batch.sh --parallel 4
+./run.sh --parallel 4
 
 # 3. 処理完了後に統合
 ./merge_pmtiles.sh
@@ -158,7 +158,7 @@ wget unzip
 #### 一括処理
 ```bash
 # 全工程を一度に実行
-./run_batch.sh --parallel 4 --merge
+./run.sh --parallel 4 --merge
 ```
 
 ## ライセンス
