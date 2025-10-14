@@ -37,7 +37,7 @@ ogr2ogr -f GPKG work.gpkg work.gpkg \
 # GeoJSONでエクスポート
 echo "Exporting joined data to GeoJSONSeq..."
 ogr2ogr -progress -f GeoJSONSeq Poly_41.geojson work.gpkg poly_41_joined \
-  -select polyID,Sinks,Gcluster15,Gcluster40
+  -select geom,polyID,Sinks,Gcluster15,Gcluster40
 
 rm -f work.gpkg
 
@@ -70,8 +70,8 @@ tippecanoe -f -Q -o terrain22_41_z9_10.mbtiles \
 
 rm -f Poly_41.geojson
 
-echo "Joining mbtiles into terrain22_41.mbtiles..."
-tile-join --force --no-tile-size-limit -o terrain22_41.mbtiles \
+echo "Joining mbtiles into terrain22_41.pmtiles..."
+tile-join --force --no-tile-size-limit -o terrain22_41.pmtiles \
   terrain22_41_z6_8.mbtiles \
   terrain22_41_z9_10.mbtiles
 
