@@ -49,6 +49,8 @@ wget unzip
 ./convert.sh 41
 ```
 
+※地域番号は[国土地理院サイト](https://gisstar.gsi.go.jp/terrain2021/)を参照してください。
+
 ### 2. 全地域の順次処理
 
 ```bash
