@@ -1,6 +1,53 @@
 #!/bin/bash
 
 # エントリスクリプト - 全ての指定された region のデータを処理
+# 使用方法:
+#   ./run.sh                      # 全地域を処理（統合なし）
+#   ./run.sh --merge             # 全地域を処理して統合
+#   ./run.sh --merge-only        # 統合のみ実行（変換処理はスキップ）
+
+# 引数解析
+MERGE_AFTER_CONVERSION=false
+MERGE_ONLY=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --merge)
+            MERGE_AFTER_CONVERSION=true
+            shift
+            ;;
+        --merge-only)
+            MERGE_ONLY=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [options]"
+            echo ""
+            echo "Options:"
+            echo "  --merge         Process all regions and merge PMTiles"
+            echo "  --merge-only    Only merge existing PMTiles (skip conversion)"
+            echo "  -h, --help      Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0              # Process all regions without merging"
+            echo "  $0 --merge      # Process all regions and merge into terrain22.pmtiles"
+            echo "  $0 --merge-only # Only merge existing PMTiles files"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$MERGE_ONLY" = true ]; then
+    echo "Starting PMTiles merge process only..."
+    ./merge_pmtiles.sh
+    exit $?
+fi
+
 echo "Starting terrain22 MVT conversion for multiple regions..."
 
 # 処理対象の region 配列
@@ -66,4 +113,21 @@ if [ $FAILURE_COUNT -gt 0 ]; then
 else
     echo ""
     echo "All conversions completed successfully!"
+    
+    # 統合処理の実行判定
+    if [ "$MERGE_AFTER_CONVERSION" = true ]; then
+        echo ""
+        echo "Starting PMTiles merge process..."
+        ./merge_pmtiles.sh
+        
+        if [ $? -eq 0 ]; then
+            echo "Merge process completed successfully!"
+        else
+            echo "Merge process failed!"
+            exit 1
+        fi
+    else
+        echo "Use './run.sh --merge' to merge all PMTiles files into terrain22.pmtiles"
+        echo "Or run './merge_pmtiles.sh' separately to merge existing files"
+    fi
 fi

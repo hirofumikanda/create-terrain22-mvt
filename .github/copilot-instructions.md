@@ -37,6 +37,14 @@ This is a geospatial data processing pipeline that converts Japanese terrain dat
   - Accepts specific region lists as arguments
   - Includes comprehensive error reporting and success/failure tracking
 
+### PMTiles Merge Processing
+- **`merge_pmtiles.sh`**: Dedicated script for consolidating regional PMTiles
+  - **Input**: Individual `terrain22_{region}.pmtiles` files
+  - **Output**: Single `terrain22.pmtiles` unified file
+  - **Process**: PMTiles → MBTiles → tile-join → PMTiles conversion flow
+  - **Error handling**: Automatic cleanup of intermediate files on failure
+  - **Customizable output**: Accepts custom filename as argument
+
 ## Critical Workflows
 
 ### Single Region Processing
@@ -47,9 +55,28 @@ This is a geospatial data processing pipeline that converts Japanese terrain dat
 ### Batch Processing Options
 ```bash
 ./run.sh                           # All regions sequentially
+./run.sh --merge                   # All regions with post-processing merge
+./run.sh --merge-only              # Merge existing PMTiles only
 ./run_batch.sh                     # All regions with advanced logging
 ./run_batch.sh 41 42 43           # Specific regions only
 ./run_batch.sh --parallel 4        # Parallel processing (4 jobs)
+./run_batch.sh --parallel 4 --merge # Parallel with automatic merge
+```
+
+### PMTiles Merge Workflows
+```bash
+./merge_pmtiles.sh                 # Merge with default filename
+./merge_pmtiles.sh custom.pmtiles  # Merge with custom filename
+```
+
+### Recommended Staged Processing
+```bash
+# 1. Test with few regions
+./run_batch.sh 41 42 43
+# 2. Process all regions in parallel
+./run_batch.sh --parallel 4
+# 3. Merge results
+./merge_pmtiles.sh
 ```
 
 ## Project-Specific Patterns
@@ -67,8 +94,15 @@ This is a geospatial data processing pipeline that converts Japanese terrain dat
 
 ### File Management
 - **Intermediate cleanup**: All temporary files (`.geojson`, `.mbtiles`, `.gpkg`) removed after processing
-- **Final output**: Only `.pmtiles` files retained
+- **Final output**: Only `.pmtiles` files retained (regional and merged)
 - **Gitignore pattern**: All processing artifacts ignored except final PMTiles
+- **Merge process**: Regional PMTiles → MBTiles → tile-join → unified PMTiles
+
+### Merge Strategy
+- **Format conversion requirement**: PMTiles must be converted to MBTiles for tile-join compatibility
+- **Automatic cleanup**: Intermediate MBTiles files removed after successful merge
+- **Error recovery**: Failed merges trigger cleanup of partial results
+- **Conditional execution**: Merge only runs if regional processing succeeds
 
 ## Key Dependencies & Tools
 

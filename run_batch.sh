@@ -2,10 +2,13 @@
 
 # エントリスクリプト - 指定された region または全ての region を処理
 # 使用方法:
-#   ./run_batch.sh                    # 全ての region を順次処理
-#   ./run_batch.sh 41 42 43          # 指定した region のみ処理
-#   ./run_batch.sh --parallel 4      # 4つの並列処理で全 region を処理
-#   ./run_batch.sh --parallel 2 41 42 43  # 2つの並列処理で指定 region を処理
+#   ./run_batch.sh                           # 全ての region を順次処理
+#   ./run_batch.sh --merge                   # 全ての region を処理して統合
+#   ./run_batch.sh --merge-only              # 統合のみ実行
+#   ./run_batch.sh 41 42 43                 # 指定した region のみ処理
+#   ./run_batch.sh --merge 41 42 43         # 指定した region を処理して統合
+#   ./run_batch.sh --parallel 4             # 4つの並列処理で全 region を処理
+#   ./run_batch.sh --parallel 2 --merge     # 2つの並列処理で全 region を処理して統合
 
 # デフォルトの処理対象 region 配列
 DEFAULT_REGIONS=(
@@ -28,6 +31,8 @@ cd "$SCRIPT_DIR"
 # 引数解析
 PARALLEL_JOBS=1
 REGIONS=()
+MERGE_AFTER_CONVERSION=false
+MERGE_ONLY=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -35,18 +40,31 @@ while [[ $# -gt 0 ]]; do
             PARALLEL_JOBS="$2"
             shift 2
             ;;
+        --merge)
+            MERGE_AFTER_CONVERSION=true
+            shift
+            ;;
+        --merge-only)
+            MERGE_ONLY=true
+            shift
+            ;;
         -h|--help)
-            echo "Usage: $0 [--parallel N] [regions...]"
+            echo "Usage: $0 [options] [regions...]"
             echo ""
             echo "Options:"
             echo "  --parallel N    Process N regions in parallel (default: 1)"
+            echo "  --merge         Merge PMTiles after conversion"
+            echo "  --merge-only    Only merge existing PMTiles (skip conversion)"
             echo "  -h, --help      Show this help message"
             echo ""
             echo "Examples:"
-            echo "  $0                        # Process all regions sequentially"
-            echo "  $0 41 42 43              # Process only regions 41, 42, 43"
-            echo "  $0 --parallel 4          # Process all regions with 4 parallel jobs"
-            echo "  $0 --parallel 2 41 42    # Process regions 41, 42 with 2 parallel jobs"
+            echo "  $0                           # Process all regions sequentially"
+            echo "  $0 --merge                   # Process all regions and merge"
+            echo "  $0 --merge-only              # Only merge existing PMTiles"
+            echo "  $0 41 42 43                  # Process only regions 41, 42, 43"
+            echo "  $0 --merge 41 42 43          # Process regions 41, 42, 43 and merge"
+            echo "  $0 --parallel 4              # Process all regions with 4 parallel jobs"
+            echo "  $0 --parallel 2 --merge      # Process all regions with 2 parallel jobs and merge"
             exit 0
             ;;
         *)
@@ -55,6 +73,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [ "$MERGE_ONLY" = true ]; then
+    echo "Starting PMTiles merge process only..."
+    ./merge_pmtiles.sh
+    exit $?
+fi
 
 # region が指定されていない場合はデフォルトを使用
 if [ ${#REGIONS[@]} -eq 0 ]; then
@@ -141,4 +165,21 @@ if [ $FAILURE_COUNT -gt 0 ]; then
 else
     echo ""
     echo "All conversions completed successfully!"
+    
+    # 統合処理の実行判定
+    if [ "$MERGE_AFTER_CONVERSION" = true ]; then
+        echo ""
+        echo "Starting PMTiles merge process..."
+        ./merge_pmtiles.sh
+        
+        if [ $? -eq 0 ]; then
+            echo "Merge process completed successfully!"
+        else
+            echo "Merge process failed!"
+            exit 1
+        fi
+    else
+        echo "Use '--merge' option to merge all PMTiles files into terrain22.pmtiles"
+        echo "Or run './merge_pmtiles.sh' separately to merge existing files"
+    fi
 fi
