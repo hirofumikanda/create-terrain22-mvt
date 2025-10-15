@@ -52,7 +52,7 @@ wget unzip
 
 ※地域番号は[国土地理院サイト](https://gisstar.gsi.go.jp/terrain2021/)を参照してください。
 
-### 2. 全地域の順次処理
+### 2. バッチ処理（高機能版）
 
 ```bash
 # 67地域すべてを順番に処理（統合なし）
@@ -63,16 +63,6 @@ wget unzip
 
 # 既存PMTilesの統合のみ
 ./run.sh --merge-only
-```
-
-### 3. バッチ処理（高機能版）
-
-```bash
-# 全地域を順次処理（統合なし）
-./run.sh
-
-# 全地域を処理して統合
-./run.sh --merge
 
 # 特定地域のみ処理
 ./run.sh 41 42 43
@@ -93,7 +83,7 @@ wget unzip
 ./run.sh --help
 ```
 
-### 4. PMTiles統合処理
+### 3. PMTiles統合処理
 
 ```bash
 # 既存の地域別PMTilesを統合
@@ -111,7 +101,7 @@ wget unzip
 - **中間ファイル**: 処理中に自動的に削除されます
 
 ### データ構造
-各PMTilesファイルには以下のフィールドが含まれます：
+各PMTilesファイルには `layer:terrain22` に以下のフィールドが含まれます：
 - `geom`: ポリゴンジオメトリ
 - `polyID`: ポリゴン識別子
 - `Sinks`: ((Filled DEM) - (Original DEM)) > 0の地域は1
