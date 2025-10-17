@@ -21,44 +21,25 @@ REGIONS=(
 )
 
 echo "====================================="
-echo "MERGING PMTILES"
+echo "MERGING MBTILES"
 echo "====================================="
-echo "Merging all regional PMTiles into $OUTPUT_FILE..."
+echo "Merging all regional MBTiles into $OUTPUT_FILE..."
 
 # 成功した地域のPMTilesファイルを収集
-PMTILES_FILES=()
+MBTILES_FILES=()
 for region in "${REGIONS[@]}"; do
-    if [ -f "terrain22_$region.pmtiles" ]; then
-        PMTILES_FILES+=("terrain22_$region.pmtiles")
+    if [ -f "terrain22_$region.mbtiles" ]; then
+        MBTILES_FILES+=("terrain22_$region.mbtiles")
     fi
 done
 
-if [ ${#PMTILES_FILES[@]} -eq 0 ]; then
-    echo "No PMTiles files found to merge."
+if [ ${#MBTILES_FILES[@]} -eq 0 ]; then
+    echo "No MBTiles files found to merge."
     echo "Make sure you have run the conversion process first."
     exit 1
 fi
 
-echo "Found ${#PMTILES_FILES[@]} PMTiles files to merge..."
-
-# tile-joinで統合（PMTilesの場合は一度MBTilesに変換してから統合）
-echo "Converting PMTiles to MBTiles for merging..."
-MBTILES_FILES=()
-for pmtiles_file in "${PMTILES_FILES[@]}"; do
-    mbtiles_file="${pmtiles_file%.pmtiles}.mbtiles"
-    echo "Converting $pmtiles_file to $mbtiles_file..."
-    
-    if ! pmtiles convert "$pmtiles_file" "$mbtiles_file"; then
-        echo "Error: Failed to convert $pmtiles_file to MBTiles"
-        # クリーンアップ
-        for cleanup_file in "${MBTILES_FILES[@]}"; do
-            rm -f "$cleanup_file"
-        done
-        exit 1
-    fi
-    
-    MBTILES_FILES+=("$mbtiles_file")
-done
+echo "Found ${#MBTILES_FILES[@]} MBTiles files to merge..."
 
 echo "Joining MBTiles files..."
 if ! tile-join --force --no-tile-size-limit -o "${OUTPUT_FILE%.pmtiles}_merged.mbtiles" "${MBTILES_FILES[@]}"; then
