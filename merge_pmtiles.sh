@@ -71,4 +71,4 @@ done
 
 echo "✓ Successfully created $OUTPUT_FILE!"
 echo "  Final output: $OUTPUT_FILE"
-echo "  Merged regions: ${#PMTILES_FILES[@]}"
+echo "  Merged regions: ${#MBTILES_FILES[@]}"
